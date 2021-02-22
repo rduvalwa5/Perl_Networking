@@ -1,0 +1,206 @@
+Active Perl Installed:  /Library/Frameworks/Python.framework/Versions/3.9/bin:/usr/local/ActivePerl-5.26/bin:.:/Library/Frameworks/Python.framework/Versions/3.9/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Applications/VMware Fusion.app/Contents/Public:/Library/Apple/usr/bin
+
+https://www.tutorialspoint.com/perl/perl_socket_programming.htm
+
+What is a Socket?
+	- Socket Berkeley UNIX mechanism of creating a virtual duplex connection between different processes
+	- later ported on to every known OS 
+			enabling communication between systems across geographical location
+			running on different OS software 
+			
+	- a typical computer system on a network receives and sends information
+			 desired by the various applications running on
+			 information is routed to the system a unique IP address designated to it
+			 information is given to the relevant applications listen on different ports
+	- example an internet browser listens on port 80 for information received from the web server
+	- can write custom applications which listen send/receive on a specific port number
+	- Summary a socket: an IP address and a port 
+		enabling connection to send and recieve data over a network
+		
+An example of Client - Server Programming using Perl 
+	- to complete a client server architecture we go through the following steps
+
+Create a Server
+	Create a socket using 								socket call
+	Bind the socket to a port address using 			bind call
+	Listen to the socket at the port address using 		listen call
+	Accept client connections using 					accept call
+
+To Create a Client
+	Create a socket with 								socket call
+	Connect (the socket) to the server using 			connect call
+	
+
+Server Side Socket Calls **********************************
+	The socket() call
+		socket() call first call in establishing a network connection creating a socket
+	This call has the following syntax −
+
+		socket( SOCKET, DOMAIN, TYPE, PROTOCOL );
+
+	The above call creates a SOCKET and other three arguments are 
+		1. integers which should have the following values for TCP/IP connections
+		2. DOMAIN should be PF_INET. It's probable 2 on your computer
+		3. TYPE should be SOCK_STREAM for TCP/IP connection.
+		4. PROTOCOL should be (getprotobyname('tcp'))[2]. 
+			It is the particular protocol such as TCP to be spoken over the socket.
+
+	So socket function call issued by the server will be something like this −
+
+		use Socket     # This defines PF_INET and SOCK_STREAM
+		socket(SOCKET,PF_INET,SOCK_STREAM,(getprotobyname('tcp'))[2]);
+
+
+The bind() call **********************************
+	socket() The sockets created by call are useless 
+		1. until they are bound to a hostname and a port number
+		2. Server uses the following bind() function to specify the port at which they will be accepting 
+		   connections from the clients
+
+		3. bind( SOCKET, ADDRESS );
+			SOCKET is the descriptor returned by socket() call 
+			ADDRESS is a socket address ( for TCP/IP ) containing three elements
+				- address family (For TCP/IP, that's AF_INET, probably 2 on your system).
+				- port number (for example 21).
+
+		4. internet address of the computer (for example 10.12.12.168).
+
+			As the bind() is used by a server, which does not need to know its own address so the argument list 
+			looks like this −
+
+			use Socket        # This defines PF_INET and SOCK_STREAM
+
+			$port = 12345;    # The unique port used by the sever to listen requests		
+			$server_ip_address = "10.12.12.168";
+
+			bind( SOCKET, pack_sockaddr_in($port, inet_aton($server_ip_address)))
+   			or die "Can't bind to port $port! \n";
+
+The or die ********************************** 
+		clause is very important because if a server dies without outstanding connections, 
+		the port won't be immediately reusable unless you use the option SO_REUSEADDR using setsockopt() 
+		function. Here pack_sockaddr_in() function is being used to pack the Port and IP address into binary format.
+
+
+***************************************************************************************
+The listen() call
+
+	If this is a server program
+		then it is required to issue a call to listen() on the specified port to listen
+			 i.e., wait for the incoming requests. This call has the following syntax −
+
+	1. listen( SOCKET, QUEUESIZE );
+			call uses SOCKET descriptor returned by socket() call
+			QUEUESIZE is the maximum number of outstanding connection request allowed simultaneously
+
+The accept() call
+
+	If this is a server program then it is required to issue a call to the access() function to accept the incoming connections
+	  This call has the following syntax −
+
+	2. accept( NEW_SOCKET, SOCKET );
+
+	The accept call receive SOCKET descriptor returned by socket() function and upon successful completion, 
+	a new socket descriptor NEW_SOCKET is returned for all future communication between the client and the server. 
+	If access() call fails, then it returns FLASE which is defined in Socket module which we have used initially.
+
+	Generally, accept() is used in an infinite loop. As soon as one connection arrives the server either 
+	creates a child process to deal with it or serves it himself and then goes back to listen for more connections
+
+	while(1) {
+   			accept( NEW_SOCKET, SOCKT );
+   			.......
+			}
+			
+	Now all the calls related to server are over and let us see a call which will be required by the client.
+
+
+***************************************************************************************
+Client Side Socket Calls
+The connect() call
+
+If you are going to prepare client program, then first you will use socket() call to create a socket and then you would have to use connect() call to connect to the server. You already have seen socket() call syntax and it will remain similar to server socket() call, but here is the syntax for connect() call −
+
+connect( SOCKET, ADDRESS );
+Here SCOKET is the socket descriptor returned by socket() call issued by the client and ADDRESS is a socket address similar to bind call, except that it contains the IP address of the remote server.
+
+$port = 21;    # For example, the ftp port
+$server_ip_address = "10.12.12.168";
+connect( SOCKET, pack_sockaddr_in($port, inet_aton($server_ip_address)))
+   or die "Can't connect to port $port! \n";
+If you connect to the server successfully, then you can start sending your commands to the server using SOCKET descriptor, otherwise your client will come out by giving an error message.
+
+Client - Server Example
+Following is a Perl code to implement a simple client-server program using Perl socket. Here server listens for incoming requests and once connection is established, it simply replies Smile from the server. The client reads that message and print on the screen. Let's see how it has been done, assuming we have our server and client on the same machine.
+
+Script to Create a Server
+
+#!/usr/bin/perl -w
+# Filename : server.pl
+
+use strict;
+use Socket;
+
+# use port 7890 as default
+my $port = shift || 7890;
+my $proto = getprotobyname('tcp');
+my $server = "localhost";  # Host IP running the server
+
+# create a socket, make it reusable
+socket(SOCKET, PF_INET, SOCK_STREAM, $proto)
+   or die "Can't open socket $!\n";
+setsockopt(SOCKET, SOL_SOCKET, SO_REUSEADDR, 1)
+   or die "Can't set socket option to SO_REUSEADDR $!\n";
+
+# bind to a port, then listen
+bind( SOCKET, pack_sockaddr_in($port, inet_aton($server)))
+   or die "Can't bind to port $port! \n";
+
+listen(SOCKET, 5) or die "listen: $!";
+print "SERVER started on port $port\n";
+
+# accepting a connection
+my $client_addr;
+while ($client_addr = accept(NEW_SOCKET, SOCKET)) {
+   # send them a message, close connection
+   my $name = gethostbyaddr($client_addr, AF_INET );
+   print NEW_SOCKET "Smile from the server";
+   print "Connection recieved from $name\n";
+   close NEW_SOCKET;
+}
+To run the server in background mode issue the following command on Unix prompt −
+
+$perl sever.pl&
+Script to Create a Client
+
+!/usr/bin/perl -w
+# Filename : client.pl
+
+use strict;
+use Socket;
+
+# initialize host and port
+my $host = shift || 'localhost';
+my $port = shift || 7890;
+my $server = "localhost";  # Host IP running the server
+
+# create the socket, connect to the port
+socket(SOCKET,PF_INET,SOCK_STREAM,(getprotobyname('tcp'))[2])
+   or die "Can't create a socket $!\n";
+connect( SOCKET, pack_sockaddr_in($port, inet_aton($server)))
+   or die "Can't connect to port $port! \n";
+
+my $line;
+while ($line = <SOCKET>) {
+   print "$line\n";
+}
+close SOCKET or die "close: $!";
+Now let's start our client at the command prompt, which will connect to the server and read message sent by the server and displays the same on the screen as follows −
+
+$perl client.pl
+Smile from the server
+NOTE − If you are giving the actual IP address in dot notation, then it is recommended to provide IP address in the same format in both client as well as server to avoid any confusion.
+
+
+
+
