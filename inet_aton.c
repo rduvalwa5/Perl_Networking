@@ -21,3 +21,12 @@ main(int argc, char *argv[])
    printf("%s\n", inet_ntoa(addr));
     exit(EXIT_SUCCESS);
 }
+
+/*
+https://linux.die.net/man/3/inet_aton
+Name
+
+inet_aton, inet_addr, inet_network, inet_ntoa, inet_makeaddr, inet_lnaof, 
+inet_netof - Internet address manipulation routines
+
+*/
