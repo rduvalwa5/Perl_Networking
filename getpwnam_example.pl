@@ -1,6 +1,8 @@
 =begin comment
 https://www.tutorialspoint.com/perl/perl_getpwnam.htm
 
+https://perldoc.perl.org/functions
+
 This function returns a list of fields In list context, as extracted from the /etc/passwd file, 
 based on the user name specified by EXPR. It's generally used like this −
 

@@ -1,6 +1,8 @@
 =begin comment
 https://www.tutorialspoint.com/perl/perl_getpwuid.htm
 
+https://perldoc.perl.org/functions
+
 Description
 
 This function returns a list of fields in list context, as extracted from the /etc/passwd file, based 

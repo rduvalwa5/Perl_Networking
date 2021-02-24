@@ -1,6 +1,8 @@
 =begin comment
 https://www.tutorialspoint.com/perl/perl_getnetbyname.htm
 
+https://perldoc.perl.org/functions
+
 This function returns the information for the network specified by 
 NAME(in list context) ($name, $aliases, $addrtype, $net)
 Syntax

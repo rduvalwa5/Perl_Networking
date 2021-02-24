@@ -1,6 +1,8 @@
 =begin comment
 https://www.tutorialspoint.com/perl/perl_getpwent.htm
 
+https://perldoc.perl.org/functions
+
 Description
 
 This function returns the next password entry from the /etc/passwd file. This is used in combination with the 
