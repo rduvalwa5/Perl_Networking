@@ -51,7 +51,7 @@ use Thread::Queue;
 my $stream = new Thread::Queue;
 my $kid    = new Thread(\&check_num, $stream, 2);
 
-for my $i ( 3 .. 100 ) {
+for my $i ( 3 .. 10000 ) {
 	$stream->enqueue($i);
     } 
 $stream->enqueue(undef);
